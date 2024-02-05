@@ -1,0 +1,161 @@
+---
+import { readByCategory } from "../../../lib/markdoc/read";
+import { blog } from "../../../lib/markdoc/frontmatter.schema";
+import PageLayout from "../../../layouts/PageLayout.astro";
+import PageMeta from "../../../components/PageMeta.astro";
+import { SITE_TITLE } from "../../../config";
+
+export function getStaticPaths() {
+  return [
+    {params: {category: 'web-development'}},
+    {params: {category: 'leetcode'}},
+    {params: {category: 'life'}},
+    {params: {category: 'translation'}},
+    {params: {category: 'easy-problem'}},
+    {params: {category: 'medium-problem'}},
+    {params: {category: 'difficult-problem'}},
+    {params: {category: 'two-pointers'}},
+    {params: {category: 'hashmap'}},
+    {params: {category: 'stack'}},
+    {params: {category: 'binary-search'}},
+    {params: {category: 'tree'}},
+    {params: {category: 'heap'}},
+    {params: {category: 'string'}},
+  ];
+}
+
+
+const { category } = Astro.params;
+
+// Filter posts by category
+const posts = await readByCategory({
+  category: category ? category : '',
+  directory: "blog",
+  frontmatterSchema: blog,
+});
+
+const sortedPosts = posts
+  .filter((p) => p.frontmatter.draft !== true)
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).valueOf() -
+      new Date(a.frontmatter.date).valueOf()
+  );
+
+const headerCategories = [
+  {
+    label: "web development",
+    path: "/blog/category/web-development",
+  },
+  {
+    label: "leetcode",
+    path: "/blog/category/leetcode",
+  },
+  {
+    label: "life",
+    path: "/blog/category/life",
+  },
+  {
+    label: "translation",
+    path: "/blog/category/translation",
+  },
+  {
+    label: "easy-problems",
+    path: "/blog/category/easy-problem",
+  },
+  {
+    label: "medium-problems",
+    path: "/blog/category/medium-problem",
+  },
+]
+---
+
+<PageLayout>
+  <PageMeta title={`Blog | ${SITE_TITLE}`} slot="meta" />
+  <section slot="main">
+    <div class="mb-6">
+      <h1
+        class="font-bold text-text-heading text-center text-4xl md:text-5xl pt-4 pb-2 overflow-hidden"
+      >
+        <span
+          class="bg-gradient-to-bl bg-no-repeat bg-bottom bg-[length:90%_40%] from-primary-blue to-primary-blue dark:from-primary-blue dark:to-primary-blue"
+        >
+          {category}
+        </span>
+      </h1>
+      <div class="hidden md:flex justify-center gap-3 my-3">
+        {
+          headerCategories.map((category) => (
+            <a href={category.path} class="transition-transform duration-300 ease-in-out transform hover:-translate-y-1">{category.label}</a>
+          ))
+        }
+      </div>
+    </div>
+    <ul class="flex flex-col md:gap-2">
+      {
+        sortedPosts.map((post) => {
+          const formattedDate = new Date(
+            post.frontmatter.date
+          ).toLocaleDateString("en-us", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+          return (
+            <li class="grid grid-cols-[1fr] md:grid-cols-[1fr_auto] mb-3 md:gap-1 items-start">
+              <div class="title">
+                <!-- External Link -->
+                {post.frontmatter.external ? (
+                  <a
+                    href={post.frontmatter.url}
+                    target="_blank"
+                    class="unset
+                        transition-[background-size] duration-300 
+                        bg-gradient-to-r bg-left-bottom bg-no-repeat
+                        bg-[length:0%_55%] hover:bg-[length:100%_55%] dark:bg-[length:0%_2px] hover:dark:bg-[length:100%_2px]
+                        from-primary-blue to-primary-blue dark:from-primary-blue dark:to-primary-blue
+                      "
+                  >
+                    <span>{post.frontmatter.title}</span>
+                    <span>
+                      <i class="ml-1 mr-1 text-[12px] pb-2 fa-solid fa-up-right-from-square" />
+                    </span>
+                  </a>
+                ) : (
+                  <a
+                    href={`/blog/${post.slug}`}
+                    class="unset
+                        transition-[background-size] duration-300 
+                        bg-gradient-to-r bg-left-bottom bg-no-repeat
+                        bg-[length:0%_55%] hover:bg-[length:100%_55%] dark:bg-[length:0%_2px] hover:dark:bg-[length:100%_2px]
+                        from-primary-blue to-primary-blue dark:from-primary-blue dark:to-primary-blue
+                      "
+                  >
+                    {post.frontmatter.title}
+                  </a>
+                )}
+              </div>
+              <div class="text-text-muted text-sm italic pt-1">
+                <time datetime={post.frontmatter.date.toISOString()}>
+                  {formattedDate}
+                </time>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2 md:mt-0">
+                {post.frontmatter.categories.map((category) => (
+                  <a
+                    href={`/blog/category/${category}`}
+                    class="rounded-full text-xs border hover:font-bold border-gray-400 py-1 px-2 hover:bg-primary-blue transition-transform duration-300 ease-in-out transform hover:-translate-y-1 unset">
+                    {category}
+                  </a>
+                ))}
+              </div>
+              <!--
+                <p>{post.frontmatter.description}</p>
+              -->
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</PageLayout>
