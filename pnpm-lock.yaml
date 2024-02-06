@@ -34,7 +34,7 @@ dependencies:
     version: 13.2.2
   gray-matter:
     specifier: ^4.0.3
-    version: 4.0.3
+    version: 4.0.3 
   netlify-cms-app:
     specifier: ^2.15.72
     version: 2.15.72(@types/react@18.2.54)(graphql@15.8.0)(react-dom@16.14.0)(react@16.14.0)
